@@ -19,11 +19,12 @@ class PineconeService {
     return PineconeService.instance;
   }
 
-  public async initializeIndex() {
+  // Initialize index only when first needed per function execution
+  public async ensureIndexExists() {
     try {
       // List existing indexes
       const indexes = await this.pinecone.listIndexes();
-      
+
       // Check if our index exists
       const habitHistoryIndexExists = indexes.indexes?.some(
         (index) => index.name === this.habitHistoryIndex
@@ -48,20 +49,23 @@ class PineconeService {
         console.log('Pinecone index already exists');
       }
     } catch (error) {
-      console.error('Error initializing Pinecone index:', error);
+      console.error('Error ensuring Pinecone index exists:', error);
       throw error;
     }
   }
 
   public async upsertHabitData(userId: string, habitId: string, inputData: any) {
     try {
+      // Ensure index exists before upserting
+      await this.ensureIndexExists();
+
       // Create an embedding from the input data (in a real app, you'd use an AI model to create embeddings)
       // For now, we'll simulate this with a basic representation
       const embedding = this.createEmbeddingFromData(inputData);
-      
+
       // Create a unique ID for this record
       const recordId = `habit_${habitId}_${Date.now()}_${uuidv4().substring(0, 8)}`;
-      
+
       // Prepare the record for upsert
       const record = {
         id: recordId,
@@ -73,15 +77,15 @@ class PineconeService {
           timestamp: new Date().toISOString()
         }
       };
-      
+
       // Get the index
       const index = this.pinecone.Index(this.habitHistoryIndex);
-      
+
       // Upsert the record
       await index.upsert([record]);
-      
+
       console.log(`Habit data upserted successfully for habit ${habitId}`);
-      
+
       return recordId;
     } catch (error) {
       console.error('Error upserting habit data to Pinecone:', error);
@@ -91,13 +95,16 @@ class PineconeService {
 
   public async querySimilarHabits(userId: string, habitId: string, topK: number = 5) {
     try {
+      // Ensure index exists before querying
+      await this.ensureIndexExists();
+
       // In a real implementation, we would create an embedding for the query
       // For now, we'll use a dummy embedding
       const queryVector = Array(1536).fill(0.1); // Placeholder for actual embedding
-      
+
       // Get the index
       const index = this.pinecone.Index(this.habitHistoryIndex);
-      
+
       // Query for similar records
       const queryResponse = await index.query({
         vector: queryVector,
@@ -105,9 +112,9 @@ class PineconeService {
         filter: { userId }, // Filter to only user's data
         includeMetadata: true
       });
-      
+
       console.log(`Found ${queryResponse.matches.length} similar habits for user ${userId}`);
-      
+
       return queryResponse.matches;
     } catch (error) {
       console.error('Error querying similar habits from Pinecone:', error);
@@ -117,13 +124,16 @@ class PineconeService {
 
   public async searchHabitHistory(userId: string, searchText: string, topK: number = 10) {
     try {
+      // Ensure index exists before searching
+      await this.ensureIndexExists();
+
       // In a real implementation, we would use an AI model to create an embedding from the search text
       // For now, we'll use a dummy embedding
       const queryVector = Array(1536).fill(0.1); // Placeholder for actual embedding
-      
+
       // Get the index
       const index = this.pinecone.Index(this.habitHistoryIndex);
-      
+
       // Query for similar records based on the search text
       const queryResponse = await index.query({
         vector: queryVector,
@@ -131,9 +141,9 @@ class PineconeService {
         filter: { userId }, // Filter to only user's data
         includeMetadata: true
       });
-      
+
       console.log(`Found ${queryResponse.matches.length} records matching search for user ${userId}`);
-      
+
       return queryResponse.matches;
     } catch (error) {
       console.error('Error searching habit history in Pinecone:', error);
@@ -164,13 +174,16 @@ class PineconeService {
 
   public async deleteHabitData(userId: string, habitId: string) {
     try {
+      // Ensure index exists before deletion
+      await this.ensureIndexExists();
+
       // Get the index
       const index = this.pinecone.Index(this.habitHistoryIndex);
-      
+
       // List all vectors for this user's specific habit and delete them
       // In practice, you'd want to implement more efficient deletion methods
       // For now, we'll use a filtering approach if supported, or we'd need to track IDs separately
-      
+
       console.log(`Habit data deletion would occur for habit ${habitId}`);
     } catch (error) {
       console.error('Error deleting habit data from Pinecone:', error);

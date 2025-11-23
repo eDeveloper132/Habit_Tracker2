@@ -7,7 +7,6 @@ import connectDB from './db/connection/db.js';
 import authRoutes from './routes/authRoutes.js';
 import habitRoutes from './routes/habitRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
-import PineconeService from './services/pineconeService.js';
 
 // Create Express app
 const app = express();
@@ -16,18 +15,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize database connections
+// Connect to database when the server starts
 await connectDB();
 console.log(chalk.green('MongoDB connected successfully'));
-
-// Initialize Pinecone
-try {
-  const pineconeService = PineconeService.getInstance();
-  await pineconeService.initializeIndex();
-  console.log(chalk.blue('Pinecone initialized successfully'));
-} catch (error) {
-  console.error(chalk.red('Error initializing Pinecone:'), error);
-}
 
 // Routes
 app.use('/api/auth', authRoutes);
