@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import User from '../models/User.js';
 import UserPreference from '../models/UserPreference.js';
 import bcrypt from 'bcryptjs';
@@ -54,9 +54,9 @@ export const register = async (req: Request, res: Response) => {
     savedUser.preferences = userPreference._id;
     await savedUser.save();
 
-    // Create JWT token
+    // Create JWT token - convert ObjectId to string
     const token = jwt.sign(
-      { id: savedUser._id } as JwtPayload,
+      { id: savedUser._id.toString() } as JwtPayload,
       process.env.JWT_SECRET || 'fallback_secret_key',
       { expiresIn: '7d' }
     );
@@ -98,9 +98,9 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Create JWT token
+    // Create JWT token - convert ObjectId to string
     const token = jwt.sign(
-      { id: user._id } as JwtPayload,
+      { id: user._id.toString() } as JwtPayload,
       process.env.JWT_SECRET || 'fallback_secret_key',
       { expiresIn: '7d' }
     );

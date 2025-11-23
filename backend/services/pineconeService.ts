@@ -156,7 +156,7 @@ class PineconeService {
     for (let i = 0; i < dataString.length; i++) {
       const charCode = dataString.charCodeAt(i);
       const idx = i % 1536;
-      vector[idx] = (vector[idx] + charCode) % 1;
+      vector[idx] = ((vector[idx] || 0) + charCode) % 1;
     }
     
     return vector;

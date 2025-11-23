@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import PineconeService from './pineconeService.js';
-import { IHabit } from '../models/Habit.js';
-import { IHabitCompletion } from '../models/HabitCompletion.js';
+import type { IHabit } from '../models/Habit.js';
+import type { IHabitCompletion } from '../models/HabitCompletion.js';
 
 class AIService {
   private static instance: AIService;
@@ -62,8 +62,9 @@ class AIService {
         messages: [{ role: 'user', content: prompt }],
         response_format: { type: 'json_object' }
       });
-      
-      const recommendations = JSON.parse(response.choices[0].message.content || '{}');
+
+      const content = response.choices[0]?.message?.content || '{}';
+      const recommendations = JSON.parse(content);
       
       return {
         timestamp: new Date(),
@@ -154,13 +155,16 @@ class AIService {
 
       // Determine the most common time of day for successful completions
       const timeDistribution: { [key: string]: number } = {};
-      
+
       successfulCompletions.forEach(completion => {
-        const date = new Date(completion.metadata.timestamp);
-        const hour = date.getHours();
-        const timeSlot = this.getTimeSlot(hour);
-        
-        timeDistribution[timeSlot] = (timeDistribution[timeSlot] || 0) + 1;
+        if (completion.metadata && completion.metadata.timestamp) {
+          const dateString = completion.metadata.timestamp;
+          const date = typeof dateString === 'string' ? new Date(dateString) : new Date();
+          const hour = date.getHours();
+          const timeSlot = this.getTimeSlot(hour);
+
+          timeDistribution[timeSlot] = (timeDistribution[timeSlot] || 0) + 1;
+        }
       });
       
       // Find the time slot with most successful completions
@@ -214,8 +218,8 @@ class AIService {
       let totalSuccess = 0;
       similarHabits.forEach(habit => {
         // Assuming metadata contains success information
-        const successRate = habit.metadata.completionRate || 0.5;
-        totalSuccess += successRate;
+        const successRate = habit.metadata?.completionRate || 0.5;
+        totalSuccess += Number(successRate);
       });
       
       const avgSuccessRate = totalSuccess / similarHabits.length;

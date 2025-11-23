@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import Habit from '../models/Habit.js';
 import AIService from '../services/aiService.js';
 
@@ -28,6 +28,9 @@ export const getHabitRecommendations = async (req: Request, res: Response) => {
 export const getHabitInsights = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'Habit ID is required' });
+    }
     const userId = (req as any).user.id;
     
     // Validate habit belongs to user

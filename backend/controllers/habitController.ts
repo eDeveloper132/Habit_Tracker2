@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import Habit from '../models/Habit.js';
 import HabitCompletion from '../models/HabitCompletion.js';
 import User from '../models/User.js';
@@ -64,6 +64,9 @@ export const getHabitById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const userId = (req as any).user.id;
+    if (!id || !userId) {
+      return res.status(400).json({ message: 'Habit ID and User ID are required' });
+    }
 
     const habit = await Habit.findOne({ _id: id, userId });
 
@@ -85,6 +88,9 @@ export const updateHabit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const userId = (req as any).user.id;
+    if (!id || !userId) {
+      return res.status(400).json({ message: 'Habit ID and User ID are required' });
+    }
     const { name, description, frequency, target, reminderTime, isActive } = req.body;
 
     const habit = await Habit.findOne({ _id: id, userId });
@@ -117,6 +123,9 @@ export const deleteHabit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const userId = (req as any).user.id;
+    if (!id || !userId) {
+      return res.status(400).json({ message: 'Habit ID and User ID are required' });
+    }
 
     const habit = await Habit.findOne({ _id: id, userId });
     if (!habit) {
@@ -146,10 +155,13 @@ export const trackHabit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const userId = (req as any).user.id;
+    if (!id || !userId) {
+      return res.status(400).json({ message: 'Habit ID and User ID are required' });
+    }
     const { completed, notes, duration, context } = req.body;
 
     // Validate habit exists and belongs to user
-    const habit = await Habit.findOne({ _id: id, userId });
+    const habit = await Habit.findOne({ _id: id, userId: userId });
     if (!habit) {
       return res.status(404).json({ message: 'Habit not found' });
     }
@@ -254,9 +266,12 @@ export const getHabitHistory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const userId = (req as any).user.id;
+    if (!id || !userId) {
+      return res.status(400).json({ message: 'Habit ID and User ID are required' });
+    }
 
     // Validate habit exists and belongs to user
-    const habit = await Habit.findOne({ _id: id, userId });
+    const habit = await Habit.findOne({ _id: id, userId: userId });
     if (!habit) {
       return res.status(404).json({ message: 'Habit not found' });
     }
