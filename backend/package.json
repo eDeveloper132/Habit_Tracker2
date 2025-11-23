@@ -20,7 +20,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
-    "@types/node": "^20.11.17",
+    "@types/node": "^20.19.25",
     "@types/typescript": "^0.4.29",
     "typescript": "^5.9.3"
   },
@@ -29,6 +29,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/uuid": "^10.0.0",
+    "@vercel/node": "^5.5.9",
     "bcryptjs": "^2.4.3",
     "chalk": "^5.6.2",
     "cors": "^2.8.5",
